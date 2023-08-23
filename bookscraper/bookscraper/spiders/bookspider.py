@@ -1,4 +1,5 @@
 import scrapy
+from bookscraper.items import BookItem
 
 
 class BookspiderSpider(scrapy.Spider):
@@ -26,17 +27,22 @@ class BookspiderSpider(scrapy.Spider):
 
     def parse_book_page(self, response):
         table_rows = response.css('table.table tr')
-        yield {
-            "url": response.url,
-            "product_type": table_rows[1].css('td ::text').get(),
-            "title": response.css('.product_main h1 ::text').get(),
-            "category": response.xpath("//ul[@class='breadcrumb']/li[@class='active']/preceding-sibling::li[1]/a/text()").get(),
-            "price": response.css('.price_color ::text').get(),
-            "price_exc_tax": table_rows[2].css('td ::text').get(),
-            "price_inc_tax": table_rows[3].css('td ::text').get(),
-            "tax": table_rows[4].css('td ::text').get(),
-            "availability": table_rows[5].css('td ::text').get(),
-            "reviews": table_rows[6].css('td ::text').get(),
-            "rating": response.css("p.star-rating ::attr('class')").get(),
-            "description": response.xpath("//div[@id='product_description']/following-sibling::p/text()").get()
-        }
+
+        book_item = BookItem()
+        book_item['url'] = response.url
+        book_item['product_type'] = table_rows[1].css('td ::text').get()
+        book_item['title'] = response.css('.product_main h1 ::text').get()
+        book_item['category'] = response.xpath(
+            "//ul[@class='breadcrumb']/li[@class='active']/preceding-sibling::li[1]/a/text()").get()
+        book_item['price'] = response.css('.price_color ::text').get()
+        book_item['price_exc_tax'] = table_rows[2].css('td ::text').get()
+        book_item['price_inc_tax'] = table_rows[3].css('td ::text').get()
+        book_item['tax'] = table_rows[4].css('td ::text').get()
+        book_item['availability'] = table_rows[5].css('td ::text').get()
+        book_item['reviews'] = table_rows[6].css('td ::text').get()
+        book_item['rating'] = response.css(
+            "p.star-rating ::attr('class')").get()
+        book_item['description'] = response.xpath(
+            "//div[@id='product_description']/following-sibling::p/text()").get()
+
+        yield book_item
